@@ -1,0 +1,18 @@
+{
+  "sensores": [
+    {
+      "id": 1,
+      "nome": "Sensor de Pressão",
+      "valor": 5.2,
+      "status": "OK",
+      "historico": [5.1, 5.2, 5.0, 5.3]
+    },
+    {
+      "id": 2,
+      "nome": "Sensor de Fluxo",
+      "valor": 2.3,
+      "status": "Alerta",
+      "historico": [2.0, 2.1, 2.5, 2.3]
+    }
+  ]
+}
