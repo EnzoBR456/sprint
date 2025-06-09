@@ -15,7 +15,7 @@ export default function App() {
         <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Sensores" component={SensorListScreen} />
         <Stack.Screen name="Detalhes" component={SensorDetailScreen} />
-        <Stack.Screen name="Configurações" component={SettingsScreen} />
+        <Stack.Screen name="Configuração de Conexão" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

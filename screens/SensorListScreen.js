@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { View, FlatList, Button } from 'react-native';
 import SensorItem from '../components/SensorItem';
-import mockData from '../data/mockData.json';
+import sensors from '../mock/sensors.json';
 
 export default function SensorListScreen({ navigation }) {
   const [sensores, setSensores] = useState([]);
-
   useEffect(() => {
     // Simula fetch inicial
-    setSensores(mockData.sensores);
+    setSensores(sensors.sensores);
   }, []);
 
   return (
@@ -23,7 +22,7 @@ export default function SensorListScreen({ navigation }) {
           />
         )}
       />
-      <Button title="Configurações" onPress={() => navigation.navigate('Configurações')} />
+      <Button title="Configuração de Conexão" onPress={() => navigation.navigate('Configuração de Conexão')} />
     </View>
   );
 }
