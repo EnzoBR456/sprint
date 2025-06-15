@@ -5,4 +5,10 @@ Vitor Hugo Ferreira de Andrade RM 99635
 
 Instruções para rodar:
 Utilize o Small Phone do Android Studio
+
 Dependências que precisam ser instaladas:
+npx expo install react-native-screens react-native-safe-area-context react-native-gesture-handler react-native-reanimated @react-native-async-storage/async-storage
+npm install @react-navigation/native @react-navigation/native-stack
+
+depois no terminal você digita:  npx expo start
+e aperta A
