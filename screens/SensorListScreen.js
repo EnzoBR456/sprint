@@ -11,7 +11,7 @@ export default function SensorListScreen({ navigation }) {
     const carregarSensores = async () => {
       try {
         const savedUrl = await AsyncStorage.getItem('apiUrl');
-        const url = savedUrl || 'http://localhost:3000/api/sensores'; // rota esperada
+        const url = savedUrl || 'http://localhost:8080/api/readings'; // endpoint correto
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -19,7 +19,14 @@ export default function SensorListScreen({ navigation }) {
         }
 
         const data = await response.json();
-        setSensores(data.sensores || []); 
+
+        if (!data || data.length === 0) {
+          console.warn('Resposta da API vazia. Usando mock local.');
+          setSensores(mockSensors.sensores);
+          Alert.alert('Aviso', 'Dados do backend estão vazios. Usando dados locais.');
+        } else {
+          setSensores(data);
+        }
       } catch (error) {
         console.warn('Falha ao buscar da API. Carregando mock local.', error);
         setSensores(mockSensors.sensores);
