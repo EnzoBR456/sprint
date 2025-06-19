@@ -11,4 +11,4 @@ npx expo install react-native-screens react-native-safe-area-context react-nativ
 npm install @react-navigation/native @react-navigation/native-stack
 
 depois no terminal você digita:  npx expo start
-e aperta A(para emular em um android studio) ou W(para emular na web)
+e aperta W(para emular no web)
