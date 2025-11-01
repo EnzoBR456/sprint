@@ -1,9 +1,9 @@
 // services/apiService.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Configuração inicial
 let API_BASE_URL = 'http://localhost:8080';
 
+// === CONFIGURAÇÃO DA URL BASE ===
 export const setApiBaseUrl = async (url) => {
   API_BASE_URL = url;
   await AsyncStorage.setItem('apiBaseUrl', url);
@@ -12,71 +12,81 @@ export const setApiBaseUrl = async (url) => {
 export const getApiBaseUrl = async () => {
   try {
     const savedUrl = await AsyncStorage.getItem('apiBaseUrl');
-    return savedUrl || 'http://localhost:8080';
+    return savedUrl || API_BASE_URL;
   } catch (error) {
     console.error('Erro ao carregar URL:', error);
-    return 'http://localhost:8080';
+    return API_BASE_URL;
   }
 };
 
-// Serviços para suas rotas específicas
+// === HEADERS DE AUTENTICAÇÃO ===
+const getAuthHeaders = async () => {
+  const token = await AsyncStorage.getItem('jwtToken');
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+// === ENDPOINTS ===
 export const sensorAPI = {
-  // GET todas as leituras
+  // 🔹 Buscar todas as leituras
   getAllReadings: async () => {
-    try {
-      const baseUrl = await getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/readings`);
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Erro ao buscar leituras:', error);
-      throw error;
-    }
+    const baseUrl = await getApiBaseUrl();
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${baseUrl}/api/readings`, { headers });
+
+    if (!response.ok) throw new Error(`Erro ${response.status}`);
+    return await response.json();
   },
 
-  // GET leituras por sensor (para o gráfico)
+  // 🔹 Buscar leituras de um sensor específico
   getSensorReadings: async (sensorId) => {
-    try {
-      const baseUrl = await getApiBaseUrl();
-      const response = await fetch(`${baseUrl}/api/readings/sensor/${sensorId}`);
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error(`Erro ao buscar leituras do sensor ${sensorId}:`, error);
-      throw error;
-    }
+    const baseUrl = await getApiBaseUrl();
+    const headers = await getAuthHeaders();
+    const response = await fetch(`${baseUrl}/api/readings/sensor/${sensorId}`, { headers });
+
+    if (!response.ok) throw new Error(`Erro ${response.status}`);
+    return await response.json();
   },
 
-  // POST nova leitura
+  // 🔹 Criar uma nova leitura
   createReading: async (readingData) => {
-    try {
-      const baseUrl = await getApiBaseUrl();
-      const payload = {
-        sensorId: readingData.sensorId,
-        nome: readingData.nome || `Sensor ${readingData.sensorId}`,
-        readingValue: readingData.readingValue,
-        status: readingData.status || 'OK'
-      };
+    const baseUrl = await getApiBaseUrl();
+    const headers = {
+      ...(await getAuthHeaders()),
+      'Content-Type': 'application/json',
+    };
 
-      const response = await fetch(`${baseUrl}/api/readings`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+    const response = await fetch(`${baseUrl}/api/readings`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(readingData),
+    });
 
-      if (!response.ok) {
-        throw new Error(`Erro ${response.status}`);
-      }
-      return await response.json();
-    } catch (error) {
-      console.error('Erro ao criar leitura:', error);
-      throw error;
+    if (!response.ok) throw new Error(`Erro ${response.status}`);
+    return await response.json();
+  },
+
+  // 🔹 Criar um novo sensor
+  addSensor: async (sensorData) => {
+    const baseUrl = await getApiBaseUrl();
+    const headers = {
+      ...(await getAuthHeaders()),
+      'Content-Type': 'application/json',
+    };
+
+    console.log('Enviando novo sensor:', sensorData);
+
+    const response = await fetch(`${baseUrl}/api/readings`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(sensorData),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erro ao adicionar sensor:', errorText);
+      throw new Error(`Erro ${response.status}: ${errorText}`);
     }
-  }
+
+    return await response.json();
+  },
 };

@@ -1,5 +1,5 @@
 // screens/SensorListScreen.js
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   FlatList,
@@ -10,6 +10,7 @@ import {
   RefreshControl,
   Alert
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import SensorItem from '../components/SensorItem';
 import { sensorAPI } from '../services/apiService';
 
@@ -23,35 +24,31 @@ export default function SensorListScreen({ navigation }) {
   const processarLeituras = (leituras) => {
     if (!leituras || leituras.length === 0) return [];
 
-    // Agrupar leituras por sensorId
     const sensoresMap = new Map();
 
     leituras.forEach(leitura => {
       const sensorId = leitura.sensorId;
 
       if (!sensoresMap.has(sensorId)) {
-        // Primeira vez vendo este sensor
         sensoresMap.set(sensorId, { ...leitura });
       } else {
-        // Já existe este sensor, verificar se esta leitura é mais recente
         const sensorExistente = sensoresMap.get(sensorId);
         const timestampExistente = new Date(sensorExistente.timestamp);
         const timestampNova = new Date(leitura.timestamp);
 
         if (timestampNova > timestampExistente) {
-          // Esta leitura é mais recente, atualizar o sensor
           sensoresMap.set(sensorId, { ...leitura });
         }
       }
     });
 
-    // Converter Map para array
     return Array.from(sensoresMap.values());
   };
 
-  const carregarSensores = async () => {
+  const carregarSensores = async (mostrarMensagem = false) => {
     try {
       setError(null);
+      setLoading(true);
       console.log('Carregando leituras do backend...');
 
       const leituras = await sensorAPI.getAllReadings();
@@ -60,16 +57,26 @@ export default function SensorListScreen({ navigation }) {
       if (!leituras || leituras.length === 0) {
         setError('Nenhuma leitura encontrada no backend');
         setSensores([]);
+        if (mostrarMensagem) {
+          Alert.alert('Aviso', 'Nenhuma leitura foi encontrada no backend.');
+        }
       } else {
-        // Processar leituras para agrupar por sensor
         const sensoresProcessados = processarLeituras(leituras);
         console.log('Sensores processados:', sensoresProcessados.length);
         setSensores(sensoresProcessados);
+
+        if (mostrarMensagem) {
+          Alert.alert('Sucesso', 'Sensores atualizados com sucesso!');
+        }
       }
     } catch (error) {
       console.error('Erro ao carregar sensores:', error);
       setError(`Falha na conexão: ${error.message}`);
       setSensores([]);
+
+      if (mostrarMensagem) {
+        Alert.alert('Erro', 'Falha ao se conectar ao backend.');
+      }
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -78,12 +85,15 @@ export default function SensorListScreen({ navigation }) {
 
   const onRefresh = () => {
     setRefreshing(true);
-    carregarSensores();
+    carregarSensores(true); // mostra mensagem ao atualizar manualmente
   };
 
-  useEffect(() => {
-    carregarSensores();
-  }, []);
+  // 🔄 Recarrega automaticamente quando a tela ganha foco (sem alertas)
+  useFocusEffect(
+    React.useCallback(() => {
+      carregarSensores(false);
+    }, [])
+  );
 
   const testarConexao = async () => {
     try {
@@ -131,6 +141,13 @@ export default function SensorListScreen({ navigation }) {
         <Text style={styles.headerSubtitle}>
           Mostrando leitura mais recente de cada sensor
         </Text>
+
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate('Adicionar Sensor')}
+        >
+          <Text style={styles.addButtonText}>+ Adicionar Sensor</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -149,7 +166,10 @@ export default function SensorListScreen({ navigation }) {
           !error && (
             <View style={styles.center}>
               <Text>Nenhum sensor encontrado no backend</Text>
-              <TouchableOpacity style={styles.button} onPress={carregarSensores}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={() => carregarSensores(true)}
+              >
                 <Text style={styles.buttonText}>Recarregar</Text>
               </TouchableOpacity>
             </View>
@@ -196,6 +216,18 @@ const styles = StyleSheet.create({
     color: '#1976D2',
     textAlign: 'center',
     marginTop: 4
+  },
+  addButton: {
+    backgroundColor: '#1976D2',
+    padding: 10,
+    borderRadius: 6,
+    marginTop: 10,
+    alignSelf: 'center',
+  },
+  addButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 14,
   },
   errorContainer: {
     backgroundColor: '#ffebee',
@@ -256,3 +288,5 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   }
 });
+
+
