@@ -4,7 +4,9 @@ Thiago Shiromoto Sardinha RM 98483
 Vitor Hugo Ferreira de Andrade RM 99635
 
 Instruções para rodar:
-Utilize o Small Phone do Android Studio
+Docker compose MySQL:
+
+É preciso que comece a iniciar o projeto pelo banco docker , primeiro já tenha instalado o docker desktop, depois Utilize "docker compose up -d" no Terminal do Backend para subir o banco
 
 Dependências que precisam ser instaladas:
 npx expo install react-native-screens react-native-safe-area-context react-native-gesture-handler react-native-reanimated @react-native-async-storage/async-storage
@@ -22,10 +24,3 @@ Backend: mvn spring-boot:run
 Frontend: npm install 
 npx react-native run-android`
 
-Imagens:
-as imagens dos testes estão na pasta image.
-![Tela 1](1.png)
-![Tela 2](2.png)
-![Tela 3](3.png)
-![Tela 4](4.png)
-![Tela 5](5.png)
